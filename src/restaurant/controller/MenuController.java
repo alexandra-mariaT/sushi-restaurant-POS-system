@@ -7,7 +7,6 @@ import java.util.List;
 
 public class MenuController {
     private final MenuItemsRepository menuItemRepository;
-
     public MenuController() {
         this.menuItemRepository = new MenuItemsRepository();
     }

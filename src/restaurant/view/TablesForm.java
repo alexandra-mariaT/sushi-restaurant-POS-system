@@ -1,90 +1,91 @@
 package restaurant.view;
 
+import restaurant.repository.OrdersRepository;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class TablesForm extends JFrame {
-    private JPanel tablesPanel;
-    private JButton btnLogout;
-    private JButton btnTable1;
-    private JButton btnTable2;
-    private JButton btnTable3;
-    private JButton btnTable4;
-    private JPanel mainPanel;
+    private final boolean isAdmin;
+    private final Color colorBg = new Color(253, 252, 240);
+    private final Color colorFree = new Color(193, 225, 193);
+    private final Color colorOccupied = new Color(255, 183, 178);
+    private final Color colorNav = new Color(109, 104, 117);
 
-    public TablesForm() {
-        setContentPane(tablesPanel);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(600, 400);
+    public TablesForm(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+        setTitle("Restaurant Tables");
+        setSize(900, 700);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        initializeComponents();
-        applyStyling();
 
-        btnTable1.addActionListener(e -> openOrderForTable(1));
-        btnTable2.addActionListener(e -> openOrderForTable(2));
-        btnTable3.addActionListener(e -> openOrderForTable(3));
-        btnTable4.addActionListener(e -> openOrderForTable(4));
-        btnLogout.addActionListener(e -> logout());
+        JPanel mainPanel = new JPanel(new BorderLayout(25, 25));
+        mainPanel.setBackground(colorBg);
+        mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        setVisible(true);
-    }
+        JLabel lblTitle = new JLabel("SUSHI GARDEN", SwingConstants.CENTER);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblTitle.setForeground(colorNav);
+        mainPanel.add(lblTitle, BorderLayout.NORTH);
 
-    private void initializeComponents() {
-        tablesPanel.setLayout(new BorderLayout());
+        JPanel gridPanel = new JPanel(new GridLayout(3, 4, 20, 20));
+        gridPanel.setBackground(colorBg);
 
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(2, 2, 5, 5));
+        OrdersRepository repo = new OrdersRepository();
+        boolean isDayClosed = repo.isDayAlreadyClosed();
 
-        mainPanel.add(btnTable1);
-        mainPanel.add(btnTable2);
-        mainPanel.add(btnTable3);
-        mainPanel.add(btnTable4);
+        for (int i = 1; i <= 12; i++) {
+            int tableNum = i;
+            JButton btn = new JButton();
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            btn.setFocusPainted(false);
 
-        btnTable1.setText("Table 1");
-        btnTable2.setText("Table 2");
-        btnTable3.setText("Table 3");
-        btnTable4.setText("Table 4");
-        btnLogout.setText("Logout");
+            double activeTotal = repo.getActiveOrderTotal(tableNum);
+            if (activeTotal > 0) {
+                btn.setBackground(colorOccupied);
+                btn.setText("Table " + tableNum);
+            } else {
+                btn.setBackground(colorFree);
+                btn.setText("Table " + tableNum);
+            }
 
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-        southPanel.setBackground(Color.darkGray);
-        southPanel.add(btnLogout);
+            btn.addActionListener(e -> {
+                if (isDayClosed) {
+                    JOptionPane.showMessageDialog(this, "Day is closed. No new orders allowed.");
+                } else {
+                    new OrderForm(tableNum, isAdmin).setVisible(true);
+                    this.dispose();
+                }
+            });
+            gridPanel.add(btn);
+        }
+        mainPanel.add(gridPanel, BorderLayout.CENTER);
 
-        tablesPanel.add(mainPanel, BorderLayout.CENTER);
-        tablesPanel.add(southPanel, BorderLayout.SOUTH);
-    }
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        footer.setBackground(colorBg);
 
-    private void applyStyling() {
-        btnStyle(btnTable1);
-        btnStyle(btnTable2);
-        btnStyle(btnTable3);
-        btnStyle(btnTable4);
+        if (isAdmin) {
+            JButton btnZ = new JButton("Daily Report (Z)");
+            styleFooterBtn(btnZ);
+            btnZ.addActionListener(e -> new DailyClosingForm(isAdmin).setVisible(true));
+            footer.add(btnZ);
+        }
 
-        btnLogout.setBackground(Color.red);
-        btnLogout.setFont(new Font("Arial", Font.BOLD, 20));
-        btnLogout.setForeground(Color.white);
-
-        btnLogout.setPreferredSize(new Dimension(120, 40));
-    }
-
-    private void btnStyle(JButton btn) {
-        btn.setBackground(new Color(179, 118, 129));
-        btn.setFont(new Font("Arial", Font.BOLD, 20));
-        btn.setForeground(Color.black);
-    }
-
-    private void openOrderForTable(int tableNumber) {
-        System.out.println("Table " + tableNumber + " order:");
-        new OrderForm(tableNumber).setVisible(true);
-        this.dispose();
-    }
-
-    private void logout() {
-        int result = JOptionPane.showConfirmDialog(this, "Are you sure?", "", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
+        JButton btnLogout = new JButton("Logout");
+        styleFooterBtn(btnLogout);
+        btnLogout.addActionListener(e -> {
             new LoginForm().setVisible(true);
             this.dispose();
-        }
+        });
+        footer.add(btnLogout);
+
+        mainPanel.add(footer, BorderLayout.SOUTH);
+        add(mainPanel);
+    }
+
+    private void styleFooterBtn(JButton btn) {
+        btn.setPreferredSize(new Dimension(150, 45));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFocusPainted(false);
     }
 }

@@ -1,6 +1,6 @@
 package restaurant.model;
 
-public abstract class MenuItem {
+public class MenuItem {
     private final int menuItemId;
     private final String name;
     private final double price;
@@ -17,19 +17,10 @@ public abstract class MenuItem {
         this.categoryId = categoryId;
     }
 
-    public int getMenuItemId() {
-        return menuItemId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public String getImageFile() {
-        return imageFile;
-    }
+    public int getMenuItemId() { return menuItemId; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+    public String getImageFile() { return imageFile; }
+    public String getIngredients() { return ingredients; }
+    public int getCategoryId() { return categoryId; }
 }

@@ -1,8 +1,6 @@
 package restaurant.repository;
 
 import restaurant.database.DatabaseConnection;
-import restaurant.model.Dish;
-import restaurant.model.Drink;
 import restaurant.model.MenuItem;
 
 import java.sql.Connection;
@@ -35,12 +33,7 @@ public class MenuItemsRepository {
                 int categoryId = rs.getInt("CategoryID");
                 boolean isFood = rs.getBoolean("IsFood");
 
-                MenuItem item;
-                if (isFood) {
-                    item = new Dish(menuItemId, name, price, ingredients, imageFile, categoryId);
-                } else {
-                    item = new Drink(menuItemId, name, price, ingredients, imageFile, categoryId);
-                }
+                MenuItem item = new MenuItem(menuItemId, name, price, ingredients, imageFile, categoryId);
                 menu.add(item);
             }
 

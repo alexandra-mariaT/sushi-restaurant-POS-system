@@ -5,7 +5,6 @@ import restaurant.model.Person;
 
 public class UserController implements ILogin {
     private final UserRepository userRepository;
-
     public UserController() {
         this.userRepository = new UserRepository();
     }

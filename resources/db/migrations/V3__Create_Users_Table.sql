@@ -1,0 +1,9 @@
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
+BEGIN
+    CREATE TABLE Users (
+        UserID INT PRIMARY KEY IDENTITY(1,1),
+        UserName NVARCHAR(50) NOT NULL UNIQUE,
+        PinCode NVARCHAR(50) NOT NULL UNIQUE,
+        UserRole NVARCHAR(20) NOT NULL
+    )
+END

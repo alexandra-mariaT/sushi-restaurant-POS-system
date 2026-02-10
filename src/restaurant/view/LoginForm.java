@@ -2,78 +2,86 @@ package restaurant.view;
 
 import restaurant.controller.UserController;
 import restaurant.model.Admin;
-import restaurant.model.Waiter;
 import restaurant.model.Person;
-
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class LoginForm extends JFrame {
-    private JPanel loginJPanel;
-    private JPasswordField pFieldLogin;
-    private JButton btn0;
-    private JButton btn1;
-    private JButton btn2;
-    private JButton btn3;
-    private JButton btn4;
-    private JButton btn5;
-    private JButton btn6;
-    private JButton btn7;
-    private JButton btn8;
-    private JButton btn9;
-    private JButton btnCancel;
-    private JButton btnLogin;
-    private JPanel keypadJPanel;
+    private final JPasswordField pFieldLogin;
     private final StringBuilder password = new StringBuilder();
-    private final UserController userController;
+    private final UserController userController = new UserController();
+
+    private final Color colorBg = new Color(253, 252, 240);
+    private final Color colorBtn = new Color(214, 226, 233);
+    private final Color colorOK = new Color(193, 225, 193);
+    private final Color colorCancel = new Color(255, 183, 178);
+    private final Color colorText = new Color(109, 104, 117);
 
     public LoginForm() {
-        setContentPane(loginJPanel);
+        setTitle("Login");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(300, 350);
+        setSize(350, 500);
         setLocationRelativeTo(null);
 
-        this.userController = new UserController();
-        GridLayout keypadLayout = new GridLayout(4, 3); //ca sa fie egale butoanele le am pus intr un grid layout
-        keypadJPanel.setLayout(keypadLayout);
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBackground(colorBg);
+        mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        applyStyle();
+        JPanel headerPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        headerPanel.setBackground(colorBg);
 
-        btn0.addActionListener(e -> addCifra(0));
-        btn1.addActionListener(e -> addCifra(1));
-        btn2.addActionListener(e -> addCifra(2));
-        btn3.addActionListener(e -> addCifra(3));
-        btn4.addActionListener(e -> addCifra(4));
-        btn5.addActionListener(e -> addCifra(5));
-        btn6.addActionListener(e -> addCifra(6));
-        btn7.addActionListener(e -> addCifra(7));
-        btn8.addActionListener(e -> addCifra(8));
-        btn9.addActionListener(e -> addCifra(9));
-        btnCancel.addActionListener(e -> clearPassword());
-        btnLogin.addActionListener(e -> attemptLogin());
+        JLabel lblTitle = new JLabel("ENTER PIN", SwingConstants.CENTER);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitle.setForeground(colorText);
 
-        setVisible(true);
-    }
+        pFieldLogin = new JPasswordField();
+        pFieldLogin.setEditable(false);
+        pFieldLogin.setHorizontalAlignment(JTextField.CENTER);
+        pFieldLogin.setFont(new Font("Arial", Font.BOLD, 24));
+        pFieldLogin.setBorder(BorderFactory.createLineBorder(colorBtn, 2));
 
-    private void applyStyle() {
-        loginJPanel.setBackground(Color.darkGray);
+        headerPanel.add(lblTitle);
+        headerPanel.add(pFieldLogin);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        JButton[] buttons = {btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9};
-        for (JButton btn : buttons) {
-            btn.setBackground(Color.darkGray);
-            btn.setForeground(Color.white);
-            btn.setFont(new Font("Arial", Font.BOLD, 20));
+        JPanel keypadPanel = new JPanel(new GridLayout(4, 3, 10, 10));
+        keypadPanel.setBackground(colorBg);
+
+        for (int i = 1; i <= 9; i++) {
+            keypadPanel.add(createNumButton(String.valueOf(i)));
         }
 
-        btnLogin.setBackground(Color.green);
-        btnLogin.setForeground(Color.white);
-        btnLogin.setFont(new Font("Arial", Font.BOLD, 20));
+        JButton btnCancel = createNumButton("C");
+        btnCancel.setBackground(colorCancel);
+        btnCancel.addActionListener(e -> clearPassword());
 
-        btnCancel.setBackground(Color.red);
-        btnCancel.setForeground(Color.white);
-        btnCancel.setFont(new Font("Arial", Font.BOLD, 20));
+        JButton btn0 = createNumButton("0");
+
+        JButton btnLogin = createNumButton("OK");
+        btnLogin.setBackground(colorOK);
+        btnLogin.addActionListener(e -> attemptLogin());
+
+        keypadPanel.add(btnCancel);
+        keypadPanel.add(btn0);
+        keypadPanel.add(btnLogin);
+
+        mainPanel.add(keypadPanel, BorderLayout.CENTER);
+        add(mainPanel);
     }
-    private void addCifra(int cifra) {
+
+    private JButton createNumButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        btn.setForeground(colorText);
+        btn.setBackground(colorBtn);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        if (text.matches("\\d")) btn.addActionListener(e -> addDigit(text));
+        return btn;
+    }
+
+    private void addDigit(String cifra) {
         if (password.length() < 4) {
             password.append(cifra);
             pFieldLogin.setText("*".repeat(password.length()));
@@ -86,24 +94,14 @@ public class LoginForm extends JFrame {
     }
 
     private void attemptLogin() {
-        String enteredPin = password.toString();
-        Person person = userController.login(enteredPin);
-
+        Person person = userController.login(password.toString());
         if (person != null) {
-            if (person instanceof Admin) {
-                System.out.println("Admin: " + person.getUserName());
-                new AdminMenuForm().setVisible(true);
-            } else if (person instanceof Waiter) {
-                System.out.println("Waiter: " + person.getUserName());
-                new TablesForm().setVisible(true);
-            }
-
+            boolean isAdmin = (person instanceof Admin);
+            new TablesForm(isAdmin).setVisible(true);
             this.dispose();
-
         } else {
-            JOptionPane.showMessageDialog(this, "Error: Invalid pin!");
+            JOptionPane.showMessageDialog(this, "Invalid PIN!", "Error", JOptionPane.ERROR_MESSAGE);
+            clearPassword();
         }
-
-        clearPassword();
     }
 }

@@ -1,5 +1,4 @@
 # --- SECURITY ---
-# Never commit the actual environment file with passwords
 .env
 .env.local
 

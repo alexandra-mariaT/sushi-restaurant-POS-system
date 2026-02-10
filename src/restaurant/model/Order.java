@@ -12,7 +12,6 @@ public class Order {
     public int getTableNumber() {
         return tableNumber;
     }
-
     public double getTotalAmount() {
         return totalAmount;
     }

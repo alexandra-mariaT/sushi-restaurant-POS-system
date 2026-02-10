@@ -1,10 +1,11 @@
 package restaurant.main;
 
-import restaurant.view.LoginForm;
-
 public class Main {
     public static void main(String[] args) {
+        restaurant.database.DatabaseMigration.runMigrations();
 
-        LoginForm loginForm = new LoginForm();
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new restaurant.view.LoginForm().setVisible(true);
+        });
     }
 }
